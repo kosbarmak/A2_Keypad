@@ -10,9 +10,11 @@
 
 #define ROW_COUNT 4
 #define COL_COUNT 3
+#define LED_COUNT 4
 
 #define PC_ROW_START 0
 #define PC_COLUMN_START 10
+#define PA_LED_START 5
 
 void gpio_init()
 {
@@ -28,6 +30,12 @@ void gpio_init()
 	// PC10-12
 	GPIOC->MODER &= ~(GPIO_MODER_MODE10 | GPIO_MODER_MODE11 | GPIO_MODER_MODE12);
 	GPIOC->MODER |= (GPIO_MODER_MODE10_0 | GPIO_MODER_MODE11_0 | GPIO_MODER_MODE12_0);
+
+	// set LEDS as output 
+	// PA5-8
+	GPIOA->MODER &= ~(GPIO_MODER_MODE5 | GPIO_MODER_MODE6 | GPIO_MODER_MODE7 | GPIO_MODER_MODE8);
+
+	GPIOA->MODER |= (GPIO_MODER_MODE5 | GPIO_MODER_MODE6 | GPIO_MODER_MODE7 | GPIO_MODER_MODE8);
 }
 
 bool row_is_high(uint8_t i)
@@ -75,6 +83,22 @@ uint8_t get_pressed_key()
 				get_key_value(i, j);
 }
 
+void LED_turn_off()
+{
+	GPIOA->ODR &= ~GPIO_ODR_OD5;
+	GPIOA->ODR &= ~GPIO_ODR_OD6;
+	GPIOA->ODR &= ~GPIO_ODR_OD7;
+	GPIOA->ODR &= ~GPIO_ODR_OD8;
+}
+
+void count_display(uint8_t val)
+{
+	LED_turn_off();
+	GPIOC->ODR |= ((val) << GPIO_ODR_OD0_Pos);
+	HAL_Delay(DISPLAY_DELAY);
+}
+
+	
 int main(void)
 {
 	HAL_Init();
