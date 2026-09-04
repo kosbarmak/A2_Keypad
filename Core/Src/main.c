@@ -14,6 +14,8 @@
 #define PC_ROW_START 0
 #define PC_COLUMN_START 10
 
+#define INVALID_VALUE -1
+
 void gpio_init()
 {
 	// set rows as input
@@ -61,18 +63,32 @@ bool key_is_pressed(uint8_t row, uint8_t col)
 	return row_is_high(row);
 }
 
-uint8_t get_key_value(uint8_t i, uint8_t j) {
+int get_key_value(uint8_t i, uint8_t j)
+{
 	// regular keys
-	if ((0 < i) && (i < ROW_COUNT) && (0 < j) && (j < COL_COUNT - 1))
+	if ((0 < i) && (i < ROW_COUNT - 1))
 		return (i * COL_COUNT) + j;
+
+	if (j == 0)
+		return 10;
+
+	if (j == 1)
+		return 0;
+	
+	if (j == 2)
+		return 15;
+
+	return INVALID_VALUE;
 }
 
-uint8_t get_pressed_key()
+int get_pressed_key()
 {
 	for (uint8_t i = 0; i < COL_COUNT; i++)
 		for (uint8_t j = 0; j < ROW_COUNT - 1; j++)
 			if (key_is_pressed(i, j))
-				get_key_value(i, j);
+				return get_key_value(i, j);
+
+	return INVALID_VALUE;
 }
 
 int main(void)
@@ -80,6 +96,7 @@ int main(void)
 	HAL_Init();
 
 	while (1) {
-		get_pressed_key();
+		int key = get_pressed_key();
+		if (key != INVALID_VALUE)
 	}
 }
