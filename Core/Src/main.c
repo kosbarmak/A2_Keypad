@@ -77,19 +77,20 @@ bool key_is_pressed(uint8_t row, uint8_t col)
 	return row_is_high(row);
 }
 
-int get_key_value(uint8_t i, uint8_t j)
+int get_key_value(uint8_t row, uint8_t col)
 {
-	// regular keys
-	if ((0 < i) && (i < ROW_COUNT - 1))
-		return (i * COL_COUNT) + j;
+	// treat all rows but the last one as a regularly ordered numerical grid
+	if ((0 < row) && (row < ROW_COUNT))
+		return (row * COL_COUNT) + col;
 
-	if (j == 0)
+	// treat the last row with special hardcoded values
+	if (col == 0)
 		return 10;
 
-	if (j == 1)
+	if (col == 1)
 		return 0;
 
-	if (j == 2)
+	if (col == 2)
 		return 15;
 
 	return INVALID_VALUE;
@@ -98,7 +99,7 @@ int get_key_value(uint8_t i, uint8_t j)
 int get_pressed_key()
 {
 	for (uint8_t i = 0; i < COL_COUNT; i++)
-		for (uint8_t j = 0; j < ROW_COUNT - 1; j++)
+		for (uint8_t j = 0; j < ROW_COUNT; j++)
 			if (key_is_pressed(i, j))
 				return get_key_value(i, j);
 
