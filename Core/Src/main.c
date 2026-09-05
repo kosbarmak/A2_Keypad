@@ -2,6 +2,7 @@
 
 #include "stdbool.h"
 #include "stm32l476xx.h"
+#include "stm32l4xx_hal.h"
 #include "stm32l4xx_hal_gpio.h"
 #include <stdint.h>
 
@@ -18,8 +19,13 @@
 
 #define INVALID_VALUE -1
 
+void bus_init() {
+	RCC->AHB2ENR |= (RCC_AHB2ENR_GPIOAEN | RCC_AHB2ENR_GPIOCEN);
+}
+
 void gpio_init()
 {
+
 	// set rows as input
 	// PC0-3
 	GPIOC->MODER &= ~(GPIO_MODER_MODE0 | GPIO_MODER_MODE1 | GPIO_MODER_MODE2 | GPIO_MODER_MODE3);
@@ -33,11 +39,11 @@ void gpio_init()
 	GPIOC->MODER &= ~(GPIO_MODER_MODE10 | GPIO_MODER_MODE11 | GPIO_MODER_MODE12);
 	GPIOC->MODER |= (GPIO_MODER_MODE10_0 | GPIO_MODER_MODE11_0 | GPIO_MODER_MODE12_0);
 
-	// set LEDS as output 
+	// set LEDS as output
 	// PA5-8
 	GPIOA->MODER &= ~(GPIO_MODER_MODE5 | GPIO_MODER_MODE6 | GPIO_MODER_MODE7 | GPIO_MODER_MODE8);
 
-	GPIOA->MODER |= (GPIO_MODER_MODE5 | GPIO_MODER_MODE6 | GPIO_MODER_MODE7 | GPIO_MODER_MODE8);
+	GPIOA->MODER |= (GPIO_MODER_MODE5_0 | GPIO_MODER_MODE6_0 | GPIO_MODER_MODE7_0 | GPIO_MODER_MODE8_0);
 }
 
 bool row_is_high(uint8_t i)
@@ -82,7 +88,7 @@ int get_key_value(uint8_t i, uint8_t j)
 
 	if (j == 1)
 		return 0;
-	
+
 	if (j == 2)
 		return 15;
 
@@ -111,16 +117,28 @@ void count_display(uint8_t val)
 {
 	LED_turn_off();
 	GPIOC->ODR |= ((val) << GPIO_ODR_OD0_Pos);
-	HAL_Delay(DISPLAY_DELAY);
+	// HAL_Delay(DISPLAY_DELAY);
 }
 
-	
 int main(void)
 {
 	HAL_Init();
+	
+	bus_init();
+	gpio_init();
 
+	LED_turn_off();
+	
 	while (1) {
 		int key = get_pressed_key();
-		if (key != INVALID_VALUE)
+		if (key == INVALID_VALUE)
+			continue;
+		
+		GPIOA->ODR ^= GPIO_ODR_OD5;
+		GPIOA->ODR ^= GPIO_ODR_OD6;
+		GPIOA->ODR ^= GPIO_ODR_OD7;
+		GPIOA->ODR ^= GPIO_ODR_OD8;
+
+		HAL_Delay(1000);
 	}
 }
