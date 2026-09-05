@@ -80,7 +80,7 @@ bool key_is_pressed(uint8_t row, uint8_t col)
 int get_key_value(uint8_t row, uint8_t col)
 {
 	// treat all rows but the last one as a regularly ordered numerical grid
-	if ((0 <= row) && (row < ROW_COUNT - 1))
+	if (row < ROW_COUNT - 1)
 		return (row * COL_COUNT) + col + 1;
 
 	// treat the last row with special hardcoded values
