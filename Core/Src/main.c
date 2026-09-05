@@ -80,8 +80,8 @@ bool key_is_pressed(uint8_t row, uint8_t col)
 int get_key_value(uint8_t row, uint8_t col)
 {
 	// treat all rows but the last one as a regularly ordered numerical grid
-	if ((0 < row) && (row < ROW_COUNT))
-		return (row * COL_COUNT) + col;
+	if ((0 <= row) && (row < ROW_COUNT - 1))
+		return (row * COL_COUNT) + col + 1;
 
 	// treat the last row with special hardcoded values
 	if (col == 0)
@@ -98,8 +98,8 @@ int get_key_value(uint8_t row, uint8_t col)
 
 int get_pressed_key()
 {
-	for (uint8_t i = 0; i < COL_COUNT; i++)
-		for (uint8_t j = 0; j < ROW_COUNT; j++)
+	for (uint8_t i = 0; i < ROW_COUNT; i++)
+		for (uint8_t j = 0; j < COL_COUNT; j++)
 			if (key_is_pressed(i, j))
 				return get_key_value(i, j);
 
@@ -117,7 +117,7 @@ void LED_turn_off()
 void count_display(uint8_t val)
 {
 	LED_turn_off();
-	GPIOC->ODR |= ((val) << GPIO_ODR_OD0_Pos);
+	GPIOA->ODR |= ((val) << GPIO_ODR_OD5_Pos);
 	// HAL_Delay(DISPLAY_DELAY);
 }
 
@@ -135,10 +135,7 @@ int main(void)
 		if (key == INVALID_VALUE)
 			continue;
 		
-		GPIOA->ODR ^= GPIO_ODR_OD5;
-		GPIOA->ODR ^= GPIO_ODR_OD6;
-		GPIOA->ODR ^= GPIO_ODR_OD7;
-		GPIOA->ODR ^= GPIO_ODR_OD8;
+		count_display(key);
 
 		HAL_Delay(1000);
 	}
